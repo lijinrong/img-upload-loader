@@ -1,13 +1,17 @@
 {
   "name": "img-upload-loader",
   "version": "1.0.0",
-  "description": "",
-  "private": true,
+  "description": "图片自动上传cdn并替换原地址",
+  "private": false,
   "main": "./lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "tsc --watch"
+  },
+	"repository": {
+    "type": "git",
+    "url": "https://github.com/lijinrong/img-upload-loader"
   },
   "author": "",
   "license": "ISC",
