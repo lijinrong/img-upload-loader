@@ -3,6 +3,9 @@ import { getOptions } from 'loader-utils';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import ora from 'ora';
+
+const cacheFileName = 'img-url-map.json';
 
 interface Data {
   url: string;
@@ -18,14 +21,16 @@ const imgUploadLoader = async function (source: Buffer): Promise<void> {
     // @ts-ignore
     const data = await Process(source, options, this);
     callback(null, `module.exports = '${data.url}'`);
+    return;
   } catch (e) {
-    console.error(e);
+    // @ts-ignore
+    this.emitError(e);
+    throw e;
   }
-  return;
 };
 
 // 上传
-function upload( url: string, file: Buffer): Promise<Data> {
+function upload(url: string, file: Buffer): Promise<Data> {
   return new Promise((res, rej) => {
     axios({
       method: 'POST',
@@ -67,13 +72,13 @@ function checkUrlMap(hash: string, cachePath: string, context: any): any {
   const filePath = cachePath;
   const key = context.resourcePath.replace(context.options.context, '');
   try {
-		// 已有缓存的json文件
-    const file = fs.readFileSync(filePath, 'utf-8');
+    // 已有缓存的json文件
+    const file = fs.readFileSync(path.join(filePath, cacheFileName), 'utf-8');
     const result = JSON.parse(file);
     return result[key] && result[key].hash === hash && result[key].url;
   } catch (err) {
     if (err.code === 'ENOENT') {
-			// 无缓存文件，返回空
+      // 无缓存文件，返回空
       return '';
     } else {
       throw err;
@@ -87,14 +92,14 @@ function genUrlMap(hash: string, url: string, cachePath: string, context: any) {
   const key: string = context.resourcePath.replace(context.options.context, '');
   let result: any;
   try {
-    const file = fs.readFileSync(filePath, 'utf-8');
+    const file = fs.readFileSync(path.join(filePath, cacheFileName), 'utf-8');
     result = JSON.parse(file);
-		// 检查脏数据并删除
-		Object.keys(result).forEach((item) => {
-			if(!fs.existsSync(`${context.options.context}${item}`)) {
-				delete result[item]
-			}
-		})
+    // 检查脏数据并删除
+    Object.keys(result).forEach((item) => {
+      if (!fs.existsSync(`${context.options.context}${item}`)) {
+        delete result[item];
+      }
+    });
     result[key] = {
       hash,
       url,
@@ -114,7 +119,7 @@ function genUrlMap(hash: string, url: string, cachePath: string, context: any) {
     }
   }
   const Str_ans = JSON.stringify(result, null, 4);
-  fs.writeFile(filePath, Str_ans, 'utf8', (err) => {
+  fs.writeFile(path.join(filePath, cacheFileName), Str_ans, 'utf8', (err) => {
     if (err) throw err;
   });
 }
@@ -127,15 +132,16 @@ async function Process(
   const md5 = genMd5(file);
   const cachePath = options.cachePath
     ? options.cachePath
-    : path.join(
-        context.output.path.replace('__dist', 'dist'),
-        'img-url-map.json',
-      );
+    : context.output.path.replace('__dist', 'dist');
   const url = checkUrlMap(md5, cachePath, context);
   const isUpload = !!url;
   if (!isUpload) {
+    const key = context.resourcePath.replace(context.options.context, '');
+		const spinner = ora(`uploading images: ${key}`);
+    spinner.start();
     const data = await upload(options.url, file);
     genUrlMap(md5, data.url, cachePath, context);
+    spinner.succeed();
     return data;
   } else {
     return {

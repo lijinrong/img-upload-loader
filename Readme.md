@@ -15,7 +15,7 @@ webpack.config.js
 						options: {
 							// 上传的地址
 							url: 'path-to-upload',
-							cachePath: path.resolve(__dirname, '../../dist/prod/img-url-map.json')
+							cachePath: path.resolve(__dirname, '../../dist/prod')
 						}
           }: {
             loader: 'url-loader',
@@ -31,8 +31,10 @@ webpack.config.js
 ...
 ```
 
+## 注意事项
+1. 建议只在线上环境使用，在开发环境不应上传图片
 
 ## TODO
-1. 打印上传进度
+1. ~~打印上传进度~~
 2. 上传失败重试
 3. ~~删除图片或文件名变化时，怎么才能避免json因无用数据越来越大（脏数据检测）~~
