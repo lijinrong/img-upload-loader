@@ -5,32 +5,32 @@
 webpack.config.js
 
 ```javascript
-	...
-		module: {
-			rules: [
-				...,
-				{
-					test: /\.(png|jpe?g|gif)(\?.*)?$/,
-					use: [
-						process.env.NODE_ENV !== 'development' ? {
-							loader: 'img-upload-loader',
-							options: {
-								// 上传的地址
-								url: 'path-to-upload',
-								cachePath: path.resolve(__dirname, '../../dist/prod')
-							}
-						}: {
-							loader: 'url-loader',
-							options: {
-								limit: 1000,
-								name: utils.assetsPath('img/[name].[hash:7].[ext]'),
-							},
-						},
-					],
-				},
-				...
-			]
-	...
+...
+module: {
+  rules: [
+  ...,
+    {
+      test: /\.(png|jpe?g|gif)(\?.*)?$/,
+        use: [
+          process.env.NODE_ENV !== 'development' ? {
+              loader: 'img-upload-loader',
+              options: {
+                // 上传的地址
+                url: 'path-to-upload',
+                cachePath: path.resolve(__dirname, '../../dist/prod')
+              }
+            }: {
+              loader: 'url-loader',
+              options: {
+                limit: 1000,
+                name: utils.assetsPath('img/[name].[hash:7].[ext]'),
+              },
+            },
+          ],
+        },
+        ...
+      ]
+...
 ```
 
 ## 注意事项
