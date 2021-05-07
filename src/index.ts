@@ -85,10 +85,16 @@ function checkUrlMap(hash: string, cachePath: string, context: any): any {
 function genUrlMap(hash: string, url: string, cachePath: string, context: any) {
   const filePath = cachePath;
   const key: string = context.resourcePath.replace(context.options.context, '');
-  let result;
+  let result: any;
   try {
     const file = fs.readFileSync(filePath, 'utf-8');
     result = JSON.parse(file);
+		// 检查脏数据并删除
+		Object.keys(result).forEach((item) => {
+			if(!fs.existsSync(`${context.options.context}${item}`)) {
+				delete result[item]
+			}
+		})
     result[key] = {
       hash,
       url,
