@@ -164,7 +164,6 @@ async function Process(
       spinner.succeed();
       return data;
     } catch (e) {
-      console.log(e.toJSON());
       if (e.code === 'ECONNRESET') {
         console.log('重试中', file);
         return await Process(file, options, context);
