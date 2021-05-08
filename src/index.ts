@@ -1,4 +1,4 @@
-import axios from 'axios';
+import request from 'request';
 import { getOptions } from 'loader-utils';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -24,33 +24,12 @@ const imgUploadLoader = async function (source: Buffer): Promise<void> {
 };
 
 // 上传
-function upload(url: string, file: Buffer): Promise<Data> {
+function upload(url: string, filePath:string): Promise<Data> {
   return new Promise((res, rej) => {
-    axios({
-      method: 'POST',
-      url: url,
-      data: file,
-      headers: {
-        Accept:
-          'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-        'Content-Type': 'application/octet-stream',
-        Connection: 'keep-alive',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language':
-          'zh-CN,zh;q=0.9,en;q=0.8,es-MX;q=0.7,es;q=0.6,tr;q=0.5,id;q=0.4,hi;q=0.3,en-US;q=0.2,th;q=0.1,ru;q=0.1,uz;q=0.1',
-        'Sec-Fetch-Dest': 'image',
-        'Sec-Fetch-Mode': 'no-cors',
-        'Sec-Fetch-Site': 'cross-site',
-        'User-Agent':
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
-      },
-    })
-      .then((response) => {
-        res(response.data);
-      })
-      .catch((err) => {
-        rej(err);
-      });
+    fs.createReadStream(filePath).pipe(request.post(url, function(err:any, _, body:any) {
+			if(err) return rej(err)
+			res(JSON.parse(body))
+		}))
   });
 }
 
@@ -159,13 +138,13 @@ async function Process(
     const spinner = ora(`uploading images: ${key}`);
     spinner.start();
     try {
-      const data = await upload(options.url, file);
+      const data = await upload(options.url, context.resourcePath);
       genUrlMap(md5, data.url, cachePath, context);
       spinner.succeed();
       return data;
     } catch (e) {
       if (e.code === 'ECONNRESET') {
-        console.log('重试中', file);
+        console.log('重试中', e);
         return await Process(file, options, context);
       }
     }
