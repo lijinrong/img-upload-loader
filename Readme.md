@@ -1,4 +1,8 @@
 # 图片自动上传 cdn 并替换原地址
+开发过程中，图片太多手动上传到cdn过于繁琐。使用此工具不需要手动上传
+
+## 安装
+npm install img-upload-loader --save-dev
 
 ## 使用方法
 
