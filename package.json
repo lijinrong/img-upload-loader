@@ -1,6 +1,6 @@
 {
   "name": "img-upload-loader",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "图片自动上传cdn并替换原地址",
   "private": false,
   "main": "./lib/index.js",
